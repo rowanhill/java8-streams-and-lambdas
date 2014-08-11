@@ -16,54 +16,235 @@ html
     article
 
       section
-        h1 java8-streams
+        h1.bullet Java 8 Streams
+        h3.bullet And Other Things I Don't Know Much About
 
       section
-        h2 Keyboard Interaction
-        h3 Powered by <a href="https://github.com/markdalgleish/bespoke-keys">bespoke-keys</a>
-
-      section
-        h2 Touch Interaction
-        h3 Powered by <a href="https://github.com/markdalgleish/bespoke-touch">bespoke-touch</a>
-
-      section
-        h2 Responsive Slides
-        h3 Powered by <a href="https://github.com/markdalgleish/bespoke-scale">bespoke-scale</a>
-
-      section
-        h2 Bullet List
-        h3.bullet Powered by <a href="https://github.com/markdalgleish/bespoke-bullets">bespoke-bullets</a>
+        h2.bullet What's new in Java 8?
         ul
-          li Bullet 1
-          li Bullet 2
-          li Bullet 3
-
-      section
-        h2 Syntax Highlighting
-        h3 Powered by <a href="http://twitter.com/LeaVerou">Lea Verou</a>'s <a href="https://github.com/LeaVerou/prism">Prism</a>
-        hr
-        pre
-          code.language-javascript.
-            bespoke.from('article', {
-              keys: true,
-              touch: true,
-              hash: true,
-              state: true,
-              bullets: 'li, .bullet'
-            });
-
-      section
-        h2.bullet Just the beginning...
-        hr
-        ul
-          li Edit <a href="http://jade-lang.com/">Jade</a> markup in <em>'src/index.jade'</em>
-          li Edit <a href="http://learnboost.github.io/stylus/">Stylus</a> styles in <em>'src/styles/main.styl'</em>
-          li Edit JavaScript in <em>'src/scripts/main.js'</em>
-        hr
-        ul
+          li Date & time API overhaul
+          li Nashorn JS engine
+          li Annotation tweaks
+          li Concurrency class tweaks
           li
-            strong Enjoy! :)
-            a(href='http://twitter.com/markdalgleish')  -@markdalgleish
+            strong Lambdas & method refs
+          li
+            strong Stream API
+
+      section
+        h2.bullet Lambdas
+        ul
+          li Just like in other languages
+          li First-order reference to a function
+          li (Only closes over final variables)
+
+      section
+        h3 Simple lambda
+        pre
+          code.language-java.
+            // Simple lambdas return their body. Types can be inferred.
+            (s) -> s.toUpperCase();
+
+      section
+        h3 Multi-line lambda
+        pre
+          code.language-java.
+            // More complex lambdas explicitly return
+            (s) -> {
+                String head = s.substring(0,1);
+                String rest = s.substring(1);
+                return sub.toUpperCase();
+            }
+
+      section
+        h2.bullet Method references
+        ul
+          li Can be passed around like lambdas
+          li Come in four different flavours
+
+      section
+        h3 Static method
+        pre
+          code.language-java.
+            // valueOf is a static method
+            String::valueOf;
+
+            // Equivalent to lambda
+            (s) -> String.valueOf(s);
+
+      section
+        h3 Constructor
+        pre
+          code.language-java.
+            // Just a specialised static method
+            String::new;
+
+            // Equivalent to lambda
+            () -> new String();
+
+      section
+        h3 Bound instance method
+        pre
+          code.language-java.
+            // toUpperCase is an instance method
+            String hi = "Hello";
+            hi::toUpperCase;
+
+            // Equivalent to lambda
+            final String hi = "Hello";
+            () -> hi.toUpperCase();
+
+      section
+        h3 Unbound instance method
+        pre
+          code.language-java.
+            // toUpperCase is an instance method
+            String::toUpperCase;
+
+            // Equivalent to lambda
+            (s) -> s.toUpperCase();
+
+      section
+        h2.bullet Functional interfaces
+        ul
+          li Magic ingredient that makes lambdas play well with Java
+          li Single abstract method interface
+          li Annotated by @FunctionalInterface
+          li Defines type / signature of lambda
+          li Necessary for variable assignment, parameters, returns
+
+      section
+        h3 Assignment to variable
+        pre
+          code.language-java.
+            // Predicate is a built-in functional interface
+            Predicate&lt;String&gt; isVerb = (s) -&gt; s.endsWith("ing");
+
+      section
+        h2.bullet New functional interfaces
+        ul
+          li See java.util.function
+          li <strong>Predicate&lt;T&gt;</strong> - take a T, return true/false
+          li <strong>Consumer&lt;T&gt;</strong> - take a T, return nothing
+          li <strong>Supplier&lt;T&gt;</strong> - take nothing, return a T
+          li <strong>Function&lt;T,R&gt;</strong> - take a T, return an R
+
+      section
+        h2.bullet Pre-existing interfaces
+        ul
+          li Annotated @FunctionalInterface from Java 8
+          li <strong>Comparator&lt;T&gt;</strong> - compare two Ts
+          li <strong>Runnable</strong> - take nothing, return nothing; just execute
+
+      section
+        h2.bullet Where can you use lambdas?
+        ul
+          li Lots of places
+          li Tidies up code - no more stupid anonymous classes
+          li e.g. sort functions, running threads, UI event handlers
+          li Also <strong>streams</strong>!
+
+      section
+        h1 Stream <br/> != <br/> InputStream
+
+      section
+        h2.bullet Stream
+        ul
+          li A pipeline of transformations
+          li Executed (lazily) on some data source
+          li Possibly in parallel
+          li Consumed once executed (like an Iterator)
+
+      section
+        h3 Stream example
+        pre
+          code.language-java.
+            List&lt;String&gt; strings = Arrays.asList("foo", "bar", "baz");
+            List&lt;String&gt; titleCaseBStrings = strings.stream()
+              .map(s -> s.substring(0,1).toUpperCase() + s.substring(1))
+              .filter(s -> s.startsWith("B"))
+              .collect(Collectors.toList());
+
+            System.out.println(titleCaseStrings); // Bar, Baz
+
+      section
+        h2.bullet Common intermediate ops
+        ul
+          li <strong>map(Function&lt;T,R&gt;)</strong> - Transform each value
+          li <strong>filter(Predicate&lt;T&gt;)</strong> - Pass through or omit each value
+          li <strong>flatMap(Function&lt;T,Stream&lt;R&gt;&gt;)</strong> - Map to streams, flatten into single stream
+          li <strong>peek(Consumer&lt;T&gt;)</strong> - Don't affect the stream; side-effects only
+
+      section
+        h2.bullet Common terminal ops
+        ul
+          li <strong>count()</strong> - Count the values
+          li <strong>forEach(Consumer&lt;T&gt;)</strong> - Iterate over the values
+          li <strong>[any|all|none]Match(Predicate&lt;T&gt;)</strong> - Find if any/all/no values match
+          li <strong>collect(Collector&lt;T,A,R&gt;)</strong> - Put the values into a collection
+          li <strong>reduce(T, BinaryOperator&lt;T&gt;)</strong> - Reduce the values to a single value
+
+      section
+        h2.bullet Reduction operations
+        ul
+          li Each reduction is on a single element & the reduction so far
+          li Can be performed on subsets of the stream then combined
+          li Allows for parallelism performance gains (on large data)
+
+      section
+        h2.bullet Collection operations
+        ul
+          li Collecting is a kind of <em>mutable reduction</em>
+          li I.e. a reduction that mutates an accumulating container
+          li Collectors class has lots already
+          li e.g. Collectors.toList, Collectors.toMap, Collectors.toSet
+
+      section
+        h2.bullet Parallelism
+        ul
+          li All streams are inherently <em>serial</em> or <em>parallel</em>
+          li Can switch with .sequential() and .parallel()
+          li Property is true for whole pipeline
+          li Parallel streams manage worker thread pool for you!
+
+      section
+        h2.bullet Ensuring correct behaviour
+        ul
+          li Non-interference: don't tinker with the source
+          li Stateless: don't depend on external values
+          li Without side-effects: don't do anything but return
+
+      section
+        h2.bullet Types of ordering
+        ul
+          li Pipeline stage execution order
+          li Element execution order
+          li Encounter order
+
+      section
+        h2.bullet Pipeline stage execution order
+        ul
+          li Exactly as written in the code
+          li An element <em>must</em> pass through pipeline stage #1 before #2
+          li Even if parallelised
+          li See example
+
+      section
+        h2.bullet Element execution order
+        ul
+          li I.e. Order in which a pipeline stage sees the elements
+          li Sequential streams: order of the stream
+          li Parallel streams: who knows? Down to thread scheduling
+          li Don't rely on element ordering in stages of parallel streams!
+          li See example
+
+      section
+        h2.bullet Encounter order
+        ul
+          li The "order of the stream" mentioned before
+          li Equivalent to the iterator order of the source
+          li E.g. ArrayList has order, Set is undefined
+          li Intermediate operations can change this: sorted(), unordered()
 
     // build:js scripts/scripts.js
     script(src='bower_components/bespoke.js/dist/bespoke.min.js')
@@ -71,6 +252,6 @@ html
     script(src='bower_components/bespoke-touch/dist/bespoke-touch.min.js')
     script(src='bower_components/bespoke-bullets/dist/bespoke-bullets.min.js')
     script(src='bower_components/bespoke-scale/dist/bespoke-scale.min.js')
-    script(src='bower_components/prism/prism.js')
+    script(src='scripts/prism.js')
     script(src='scripts/main.js')
     // endbuild
