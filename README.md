@@ -3,7 +3,7 @@
 
 ## Slides and examples
 
-Slides are available on the GitHub pages site. There are a couple of Java examples in java-examples/src
+Slides are available on [the GitHub pages site](http://rowanhill.github.io/java8-streams-and-lambdas/). There are a couple of Java examples in java-examples/src
 
 ## View slides locally
 
