@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>java8-streams</title>
+    <link rel="stylesheet" href="styles/styles.css"/>
+  </head>
+  <body>
+    <article>
+      <section>
+        <h1 class="bullet">Java 8 Streams</h1>
+        <h3 class="bullet">And Other Things I Don't Know Much About</h3>
+      </section>
+      <section>
+        <h2 class="bullet">What's new in Java 8?</h2>
+        <ul>
+          <li>Date & time API overhaul</li>
+          <li>Nashorn JS engine</li>
+          <li>Annotation tweaks</li>
+          <li>Concurrency class tweaks</li>
+          <li><strong>Lambdas & method refs</strong></li>
+          <li><strong>Stream API</strong></li>
+        </ul>
+      </section>
+      <section>
+        <h2 class="bullet">Lambdas</h2>
+        <ul>
+          <li>Just like in other languages</li>
+          <li>First-order reference to a function</li>
+          <li>(Only closes over final variables)</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Simple lambda</h3>
+        <pre><code class="language-java">// Simple lambdas return their body. Types can be inferred.
+(s) -> s.toUpperCase();
+</code></pre>
+      </section>
+      <section>
+        <h3>Multi-line lambda</h3>
+        <pre><code class="language-java">// More complex lambdas explicitly return
+(s) -> {
+    String head = s.substring(0,1);
+    String rest = s.substring(1);
+    return sub.toUpperCase();
+}
+</code></pre>
+      </section>
+      <section>
+        <h2 class="bullet">Method references</h2>
+        <ul>
+          <li>Can be passed around like lambdas</li>
+          <li>Come in four different flavours</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Static method</h3>
+        <pre><code class="language-java">// valueOf is a static method
+String::valueOf;
+
+// Equivalent to lambda
+(s) -> String.valueOf(s);
+</code></pre>
+      </section>
+      <section>
+        <h3>Constructor</h3>
+        <pre><code class="language-java">// Just a specialised static method
+String::new;
+
+// Equivalent to lambda
+() -> new String();
+</code></pre>
+      </section>
+      <section>
+        <h3>Bound instance method</h3>
+        <pre><code class="language-java">// toUpperCase is an instance method
+String hi = "Hello";
+hi::toUpperCase;
+
+// Equivalent to lambda
+final String hi = "Hello";
+() -> hi.toUpperCase();
+</code></pre>
+      </section>
+      <section>
+        <h3>Unbound instance method</h3>
+        <pre><code class="language-java">// toUpperCase is an instance method
+String::toUpperCase;
+
+// Equivalent to lambda
+(s) -> s.toUpperCase();
+</code></pre>
+      </section>
+      <section>
+        <h2 class="bullet">Functional interfaces</h2>
+        <ul>
+          <li>Magic ingredient that makes lambdas play well with Java</li>
+          <li>Single abstract method interface</li>
+          <li>Annotated by @FunctionalInterface</li>
+          <li>Defines type / signature of lambda</li>
+          <li>Necessary for variable assignment, parameters, returns</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Assignment to variable</h3>
+        <pre><code class="language-java">// Predicate is a built-in functional interface
+Predicate&lt;String&gt; isVerb = (s) -&gt; s.endsWith("ing");
+</code></pre>
+      </section>
+      <section>
+        <h2 class="bullet">New functional interfaces</h2>
+        <ul>
+          <li>See java.util.function</li>
+          <li><strong>Predicate&lt;T&gt;</strong> - take a T, return true/false</li>
+          <li><strong>Consumer&lt;T&gt;</strong> - take a T, return nothing</li>
+          <li><strong>Supplier&lt;T&gt;</strong> - take nothing, return a T</li>
+          <li><strong>Function&lt;T,R&gt;</strong> - take a T, return an R</li>
+        </ul>
+      </section>
+      <section>
+        <h2 class="bullet">Pre-existing interfaces</h2>
+        <ul>
+          <li>Annotated @FunctionalInterface from Java 8</li>
+          <li><strong>Comparator&lt;T&gt;</strong> - compare two Ts</li>
+          <li><strong>Runnable</strong> - take nothing, return nothing; just execute</li>
+        </ul>
+      </section>
+      <section>
+        <h2 class="bullet">Where can you use lambdas?</h2>
+        <ul>
+          <li>Lots of places</li>
+          <li>Tidies up code - no more stupid anonymous classes</li>
+          <li>e.g. sort functions, running threads, UI event handlers</li>
+          <li>Also <strong>streams</strong>!</li>
+        </ul>
+      </section>
+      <section>
+        <h1 class="bullet">Stream</h1>
+        <h1 class="bullet">!=</h1>
+        <h1 class="bullet">InputStream</h1>
+      </section>
+      <section>
+        <h2 class="bullet">Stream</h2>
+        <ul>
+          <li>A pipeline of transformations</li>
+          <li>Executed (lazily) on some data source</li>
+          <li>Possibly in parallel</li>
+          <li>Consumed once executed (like an Iterator)</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Stream example</h3>
+        <pre><code class="language-java">List&lt;String&gt; strings = Arrays.asList("foo", "bar", "baz");
+List&lt;String&gt; titleCaseBStrings = strings.stream()
+  .map(s -> s.substring(0,1).toUpperCase() + s.substring(1))
+  .filter(s -> s.startsWith("B"))
+  .collect(Collectors.toList());
+  
+System.out.println(titleCaseBStrings); // Bar, Baz
+</code></pre>
+      </section>
+      <section>
+        <h2 class="bullet">Common intermediate ops</h2>
+        <ul>
+          <li><strong>map(Function&lt;T,R&gt;)</strong> - Transform each value</li>
+          <li><strong>filter(Predicate&lt;T&gt;)</strong> - Pass through or omit each value</li>
+          <li><strong>flatMap(Function&lt;T,Stream&lt;R&gt;&gt;)</strong> - Map to streams, flatten into single stream</li>
+          <li><strong>peek(Consumer&lt;T&gt;)</strong> - Don't affect the stream; side-effects only</li>
+        </ul>
+      </section>
+      <section>
+        <h2 class="bullet">Common terminal ops</h2>
+        <ul>
+          <li><strong>count()</strong> - Count the values</li>
+          <li><strong>forEach(Consumer&lt;T&gt;)</strong> - Iterate over the values</li>
+          <li><strong>[any|all|none]Match(Predicate&lt;T&gt;)</strong> - Find if any/all/no values match</li>
+          <li><strong>collect(Collector&lt;T,A,R&gt;)</strong> - Put the values into a collection</li>
+          <li><strong>reduce(T, BinaryOperator&lt;T&gt;)</strong> - Reduce the values to a single value</li>
+        </ul>
+      </section>
+      <section>
+        <h2 class="bullet">Reduction operations</h2>
+        <ul>
+          <li>Each reduction is on a single element & the reduction so far</li>
+          <li>Can be performed on subsets of the stream then combined</li>
+          <li>Allows for parallelism performance gains (on large data)</li>
+        </ul>
+      </section>
+      <section>
+        <h2 class="bullet">Collection operations</h2>
+        <ul>
+          <li>Collecting is a kind of <em>mutable reduction</em></li>
+          <li>I.e. a reduction that mutates an accumulating container</li>
+          <li>Collectors class has lots already</li>
+          <li>e.g. Collectors.toList, Collectors.toMap, Collectors.toSet</li>
+        </ul>
+      </section>
+      <section>
+        <h2 class="bullet">Parallelism</h2>
+        <ul>
+          <li>All streams are inherently <em>serial</em> or <em>parallel</em></li>
+          <li>Can switch with .sequential() and .parallel()</li>
+          <li>Property is true for whole pipeline</li>
+          <li>Parallel streams manage worker thread pool for you!</li>
+        </ul>
+      </section>
+      <section>
+        <h2 class="bullet">Ensuring correct behaviour</h2>
+        <ul>
+          <li>Non-interference: don't tinker with the source</li>
+          <li>Stateless: don't depend on external values</li>
+          <li>Without side-effects: don't do anything but return</li>
+        </ul>
+      </section>
+      <section>
+        <h2 class="bullet">Types of ordering</h2>
+        <ul>
+          <li>Pipeline stage execution order</li>
+          <li>Element execution order</li>
+          <li>Encounter order</li>
+        </ul>
+      </section>
+      <section>
+        <h2 class="bullet">Pipeline stage execution order</h2>
+        <ul>
+          <li>Exactly as written in the code</li>
+          <li>An element <em>must</em> pass through pipeline stage #1 before #2</li>
+          <li>Even if parallelised</li>
+          <li>See example</li>
+        </ul>
+      </section>
+      <section>
+        <h2 class="bullet">Element execution order</h2>
+        <ul>
+          <li>I.e. Order in which a pipeline stage sees the elements</li>
+          <li>Sequential streams: order of the stream</li>
+          <li>Parallel streams: who knows? Down to thread scheduling</li>
+          <li>Don't rely on element ordering in stages of parallel streams!</li>
+          <li>See example</li>
+        </ul>
+      </section>
+      <section>
+        <h2 class="bullet">Encounter order</h2>
+        <ul>
+          <li>The "order of the stream" mentioned before</li>
+          <li>Equivalent to the iterator order of the source</li>
+          <li>E.g. ArrayList has order, Set is undefined</li>
+          <li>Intermediate operations can change this: sorted(), unordered()</li>
+        </ul>
+      </section>
+      <section>
+        <h2 class="bullet">Summary</h2>
+        <ul>
+          <li>@FunctionalInterface for lambda types</li>
+          <li>Streams are lazy, possibly parallel pipelines</li>
+          <li>Operations can be given as lambdas</li>
+          <li>Should be non-interfering & stateless if parallel</li>
+          <li>Don't trust ordering in parallel</li>
+        </ul>
+      </section>
+      <section>
+        <h1>Questions?</h1>
+      </section>
+    </article>
+    <script src="scripts/scripts.js"></script>
+  </body>
+</html>
